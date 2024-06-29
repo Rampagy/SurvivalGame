@@ -4,9 +4,9 @@ from datetime import datetime
 
 from MyBot import MyBot
 
-TURNS = 1000
-HEIGHT = 50
-WIDTH = 50
+TURNS = 1200
+HEIGHT = 40
+WIDTH = 40
 MAX_HEALTH = 2
 NEW_APPLE_TURNS = 8
 APPLE_POINTS = 20
@@ -15,7 +15,7 @@ STATIONARY_POINTS = 1
 
 class Env():
     def __init__(self):
-        self.action_space = ['u', 'd', 'l', 'r', 's']
+        self.action_space = ['u', 'd', 'l', 'r', 's'] # up down left right stationary
         self.turn = 0
         self.player_pos = (HEIGHT >> 1, WIDTH >> 1)
         self.player_health = MAX_HEALTH
@@ -49,7 +49,7 @@ class Env():
         else:
             self.turn += 1
             # move the bots to their new positions
-            self.get_new_bot_positions()
+            self.update_bot_positions()
 
             # now move the player to their position
             new_player_height = self.player_pos[0]
@@ -99,11 +99,17 @@ class Env():
     def game_state(self):
         return (self.player_pos, self.bot1_pos, self.bot2_pos, self.apple_locations, self.turn, self.player_health, self.score, self.action_space, self.game_over, self.map_size)
 
-    def get_new_bot_positions(self):
-        # TODO: add better bot logic
-        self.bot1_pos = (0, 0)
-        self.bot2_pos = (HEIGHT-1, WIDTH-1)
+    def update_bot_positions(self):
+        self.bot1_pos = self.get_bot1_position()
+        self.bot2_pos = self.get_bot2_position()
 
+    def get_bot1_position(self):
+        # TODO: bot 1 chases the player
+        return self.bot1_pos
+
+    def get_bot2_position(self):
+        # TODO: bot 2 stands between the player and the apple closest to the player
+        return self.bot2_pos
 
 
 
