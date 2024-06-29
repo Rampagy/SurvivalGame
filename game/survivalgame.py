@@ -8,8 +8,8 @@ TURNS = 1000
 HEIGHT = 50
 WIDTH = 50
 MAX_HEALTH = 2
-NEW_APPLE_PERCENT = 0.1
-APPLE_POINTS = 15
+NEW_APPLE_TURNS = 8
+APPLE_POINTS = 20
 STATIONARY_POINTS = 1
 
 
@@ -17,7 +17,7 @@ class Env():
     def __init__(self):
         self.action_space = ['u', 'd', 'l', 'r', 's']
         self.turn = 0
-        self.player_pos = (HEIGHT-1, 0) # (HEIGHT >> 1, WIDTH >> 1)
+        self.player_pos = (HEIGHT >> 1, WIDTH >> 1)
         self.player_health = MAX_HEALTH
         self.bot1_pos = (0, 0)
         self.bot2_pos = (HEIGHT-1, WIDTH-1)
@@ -28,7 +28,7 @@ class Env():
 
     def reset(self):
         self.turn = 0
-        self.player_pos = (HEIGHT-1, 0) # (HEIGHT >> 1, WIDTH >> 1)
+        self.player_pos = (HEIGHT >> 1, WIDTH >> 1)
         self.player_health = MAX_HEALTH
         self.bot1_pos = (0, 0)
         self.bot2_pos = (HEIGHT-1, WIDTH-1)
@@ -76,7 +76,7 @@ class Env():
                     # game over
                     self.game_over = True
 
-            if random.uniform(0, 1) <= NEW_APPLE_PERCENT and not self.game_over:
+            if self.turn % NEW_APPLE_TURNS == 0  and not self.game_over:
                 # spawn a new apple
                 self.apple_locations += [(random.randint(0, HEIGHT-1), random.randint(0, WIDTH-1))]
 
@@ -127,7 +127,9 @@ if __name__ == '__main__':
         # get the next game state
         new_state = env.step(action)
 
-    game_history += [(*new_state, 'end')]
+    game_history += [(*new_state, '')]
+
+    print('{} points in {} turns ({} points / turn)'.format(new_state[6], new_state[4], new_state[6]/new_state[4]))
 
     # write game history to file
     now = datetime.now()
