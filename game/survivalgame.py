@@ -1,4 +1,5 @@
 import random
+import copy
 from datetime import datetime
 
 from MyBot import MyBot
@@ -16,7 +17,7 @@ class Env():
     def __init__(self):
         self.action_space = ['u', 'd', 'l', 'r', 's']
         self.turn = 0
-        self.player_pos = (HEIGHT >> 1, WIDTH >> 1)
+        self.player_pos = (HEIGHT-1, 0) # (HEIGHT >> 1, WIDTH >> 1)
         self.player_health = MAX_HEALTH
         self.bot1_pos = (0, 0)
         self.bot2_pos = (HEIGHT-1, WIDTH-1)
@@ -27,7 +28,7 @@ class Env():
 
     def reset(self):
         self.turn = 0
-        self.player_pos = (HEIGHT >> 1, WIDTH >> 1)
+        self.player_pos = (HEIGHT-1, 0) # (HEIGHT >> 1, WIDTH >> 1)
         self.player_health = MAX_HEALTH
         self.bot1_pos = (0, 0)
         self.bot2_pos = (HEIGHT-1, WIDTH-1)
@@ -54,13 +55,13 @@ class Env():
             new_player_height = self.player_pos[0]
             new_player_width = self.player_pos[1]
             if action == 'u':
-                new_player_height = (new_player_height - 1) % HEIGHT
+                new_player_height = (new_player_height - 1 + HEIGHT) % HEIGHT
             elif action == 'd':
-                new_player_height = (new_player_height + 1) % HEIGHT
+                new_player_height = (new_player_height + 1 + HEIGHT) % HEIGHT
             elif action == 'l':
-                new_player_width = (new_player_width - 1) % WIDTH
+                new_player_width = (new_player_width - 1 + WIDTH) % WIDTH
             elif action == 'r':
-                new_player_width = (new_player_width + 1) % WIDTH
+                new_player_width = (new_player_width + 1 + WIDTH) % WIDTH
             else: # unrecognized or stationary move
                 self.score += STATIONARY_POINTS
 
@@ -70,9 +71,8 @@ class Env():
             # check for collisions with bots
             if self.player_pos in [self.bot1_pos, self.bot2_pos]:
                 # reduce player health by 1
-                if self.player_health > 0:
-                    self.player_health -= 1
-                else:
+                self.player_health -= 1
+                if self.player_health <= 0:
                     # game over
                     self.game_over = True
 
@@ -102,7 +102,7 @@ class Env():
     def get_new_bot_positions(self):
         # TODO: add better bot logic
         self.bot1_pos = (0, 0)
-        self.bot2_pos = (HEIGHT-1, WIDTH-2)
+        self.bot2_pos = (HEIGHT-1, WIDTH-1)
 
 
 
@@ -110,21 +110,24 @@ class Env():
 
 if __name__ == '__main__':
     env = Env()
-    state = env.reset()
+    new_state = env.reset()
 
     # initialize game variables
-    game_history = [state]
+    game_history = []
     player = MyBot.MyBot()
 
-    while state[8] == False: # go until the game is over
+    while new_state[8] == False: # go until the game is over
+        state = copy.deepcopy(new_state)
         action = player.get_action(*state)
         # TODO: time players bot, auto exit if exceeds allotted time
 
-        # get the next game state
-        state = env.step(action)
-
         # save the game history
-        game_history += [state]
+        game_history += [(*state, action)]
+
+        # get the next game state
+        new_state = env.step(action)
+
+    game_history += [(*new_state, 'end')]
 
     # write game history to file
     now = datetime.now()
