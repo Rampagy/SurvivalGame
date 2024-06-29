@@ -1,7 +1,7 @@
 import random
 from datetime import datetime
 
-from example_player import ExamplePlayer
+from MyBot import MyBot
 
 TURNS = 1000
 HEIGHT = 50
@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
     # initialize game variables
     game_history = [state]
-    player = ExamplePlayer.ExamplePlayer() # TODO: automatic player bot detection
+    player = MyBot.MyBot()
 
     while state[8] == False: # go until the game is over
         action = player.get_action(*state)
