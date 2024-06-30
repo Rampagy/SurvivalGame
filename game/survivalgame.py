@@ -19,7 +19,7 @@ class Env():
         self.turn = 0
         self.player_pos = (HEIGHT >> 1, WIDTH >> 1)
         self.player_health = MAX_HEALTH
-        self.bot1_pos = (0, 0)
+        self.bot1_pos = (2, 2)
         self.bot2_pos = (HEIGHT-1, WIDTH-1)
         self.score = 0
         self.apple_locations = []
@@ -30,7 +30,7 @@ class Env():
         self.turn = 0
         self.player_pos = (HEIGHT >> 1, WIDTH >> 1)
         self.player_health = MAX_HEALTH
-        self.bot1_pos = (0, 0)
+        self.bot1_pos = (2, 2)
         self.bot2_pos = (HEIGHT-1, WIDTH-1)
         self.score = 0
         self.apple_locations = []
@@ -100,16 +100,52 @@ class Env():
         return (self.player_pos, self.bot1_pos, self.bot2_pos, self.apple_locations, self.turn, self.player_health, self.score, self.action_space, self.game_over, self.map_size)
 
     def update_bot_positions(self):
-        self.bot1_pos = self.get_bot1_position()
-        self.bot2_pos = self.get_bot2_position()
+        self.update_bot1_position()
+        self.update_bot2_position()
 
-    def get_bot1_position(self):
-        # TODO: bot 1 chases the player
-        return self.bot1_pos
+    def update_bot1_position(self):
+        # bot 1 chases the player
 
-    def get_bot2_position(self):
+        # check all directions and see which one is the closest to the player
+        direction = self.get_closest_direction_to_target(self.bot1_pos, self.player_pos)
+
+        # calculate the new position
+        newy = self.bot1_pos[0]
+        newx = self.bot2_pos[1]
+        if direction == 'u':
+            newy = (self.bot1_pos[0] - 1 + HEIGHT) % HEIGHT
+        elif direction == 'd':
+            newy = (self.bot1_pos[0] + 1 + HEIGHT) % HEIGHT
+        elif direction == 'l':
+            newx = (self.bot1_pos[1] - 1 + WIDTH) % WIDTH
+        elif direction == 'r':
+            newx = (self.bot1_pos[1] + 1 + WIDTH) % WIDTH
+
+        self.bot1_pos = (newy, newx)
+
+    def update_bot2_position(self):
         # TODO: bot 2 stands between the player and the apple closest to the player
-        return self.bot2_pos
+        self.bot2_pos = self.bot2_pos
+    
+    def get_closest_direction_to_target(self, position, target):
+        # check the four direction and go to the one that is closest to the target
+        direction = 's'
+        min_distance = 99999
+        for ymod, xmod, dir in [(-1, 0, 'u'), (1, 0, 'd'), (0, 1, 'r'), (0, -1, 'l')]:
+            dx = abs(position[1] + xmod - target[1])
+            if (dx > (self.map_size[1]>>1)):
+                dx = self.map_size[1] - dx
+
+            dy = abs(position[0] + ymod - target[0])
+            if dy > (self.map_size[0]>>1):
+                dy = self.map_size[0] - dy
+
+            distance = dx + dy
+            if distance < min_distance:
+                min_distance = distance
+                direction = dir
+
+        return direction
 
 
 
